@@ -1,12 +1,51 @@
 import { asyncError } from "../middlewares/errorMiddleWare.js";
 import { User } from "../models/User.js";
 import { Order } from "../models/Order.js";
+import { sendToken } from "../utils/Provider.js";
+import ErrorHandler from "../utils/ErrorHandler.js";
 
 export const myProfile = (req, res, next) => {
   res.status(200).json({
     success: true,
     user: req.user,
   });
+};
+
+export const CreateUser = asyncError(async (req, res, next) => {
+  const { name, password, email } = req.body;
+  const user = await User.create({
+    email,
+    name,
+    password,
+    username: name.split(" ").join(""),
+  });
+  sendToken(user, 201, res);
+});
+
+export const LoginUser = asyncError(async (req, res, next) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user) {
+    return next(new ErrorHandler("user not registered", 404));
+  }
+
+  const matchedPassword = await user.comparePassword(password);
+
+  if (!matchedPassword)
+    return next(new ErrorHandler("Invalid Credentials", 401));
+
+  sendToken(user, 201, res);
+  
+});
+
+export const logOutUser = async (req, res, next) => {
+  res.clearCookie("connect.sid",{
+    secure: process.env.NODE_ENV === "development" ? false : true,
+    httpOnly: process.env.NODE_ENV === "development" ? false : true,
+    sameSite: process.env.NODE_ENV === "development" ? false : "none",
+  });
+  res.json({ message: "logout succesfully!" });
 };
 
 export const logout = (req, res, next) => {

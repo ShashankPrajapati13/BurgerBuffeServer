@@ -10,9 +10,10 @@ export const instance = new Razorpay({
 });
 
 app.get("/", (req, res) => {
-  res.send("working");
+  res.render('index')
 });
 
 app.listen(process.env.PORT, () =>
   console.log(`server is working on port : ${process.env.PORT}, in ${process.env.NODE_ENV}mode`)
 );
+

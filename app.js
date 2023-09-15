@@ -13,10 +13,21 @@ import cors from "cors";
 const app = express();
 export default app;
 
+app.set('views');
+app.set('view engine', 'ejs');
+
 dotenv.config({
   path: "./config/config.env",
 });
-
+const tf = ()=>{
+  if(process.env.NODE_ENV === "development"){
+    console.log(process.env.NODE_ENV)
+    return false
+  }
+  else{
+    return true
+  }
+}
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
